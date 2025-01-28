@@ -1,0 +1,28 @@
+# Virtual environment
+venv/
+ENV/
+
+# Python files
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Logs and databases
+*.log
+*.sqlite3
+
+# Environment variables
+.env
+
+# IDE/Editor settings
+.vscode/
+.idea/
+*.swp
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Flask debugging
+instance/
