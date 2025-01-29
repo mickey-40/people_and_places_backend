@@ -1,17 +1,20 @@
 from flask import Flask
+from flask import jsonify
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager
+from flask_jwt_extended import JWTManager, create_access_token
 from models import db
 from settings import Config
 from routes.auth import auth_bp
 from routes.restaurants import restaurants_bp
+
 
 app = Flask(__name__)
 app.config.from_object(Config)
 
 # Initialize extensions
 CORS(app)
-JWTManager(app)
+app.config["JWT_ALGORITHM"] = "HS256"  # Ensure this matches login JWT
+jwt = JWTManager(app)
 db.init_app(app)
 
 # Register blueprints
@@ -25,6 +28,11 @@ def initialize_database():
         with app.app_context():
             db.create_all()
         app.db_initialized = True
+
+@app.route("/token")
+def generate_token():
+    token = create_access_token(identity="testuser")
+    return jsonify(access_token=token)
 
 if __name__ == "__main__":
     app.run(debug=True)
