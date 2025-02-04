@@ -16,8 +16,13 @@ def get_restaurants():
 @jwt_required()
 def like_restaurant():
     data = request.get_json()
-    user_id = get_jwt_identity()
+    user_id = get_jwt_identity()  # Get the user ID from the token
     restaurant_id = data.get("restaurant_id")
+
+    print(f"User ID from token: {user_id}")  # ✅ Debugging
+
+    if not user_id:
+        return jsonify({"message": "Invalid token"}), 401
 
     if Like.query.filter_by(user_id=user_id, restaurant_id=restaurant_id).first():
         return jsonify({"message": "Already liked"}), 400
