@@ -26,3 +26,15 @@ class Like(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     restaurant_id = db.Column(db.Integer, db.ForeignKey("restaurants.id"), nullable=False)
+
+class Review(db.Model):
+    __tablename__ = "reviews"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    restaurant_id = db.Column(db.Integer, db.ForeignKey("restaurants.id"), nullable=False)
+    rating = db.Column(db.Integer, nullable=False)  # Rating from 1 to 5
+    comment = db.Column(db.Text, nullable=False)
+
+    user = db.relationship("User", backref="reviews")
+    restaurant = db.relationship("Restaurant", backref="reviews")
+

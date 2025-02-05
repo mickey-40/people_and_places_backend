@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from models import Restaurant, Like, db
+from models import Restaurant, Like, Review, db
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 restaurants_bp = Blueprint("restaurants", __name__)
@@ -63,3 +63,24 @@ def get_liked_restaurants():
         {"restaurant_id": like.restaurant_id}
         for like in liked_restaurants
     ])
+
+# Create the Review 
+@restaurants_bp.route("/review", methods=["POST"])
+@jwt_required()
+def add_review():
+    data = request.get_json()
+    user_id = get_jwt_identity()
+    restaurant_id = data.get("restaurant_id")
+    rating = data.get("rating")
+    comment = data.get("comment")
+
+    # Validate input
+    if not (1 <= rating <= 5):
+        return jsonify({"message": "Rating must be between 1 and 5"}), 400
+
+    new_review = Review(user_id=user_id, restaurant_id=restaurant_id, rating=rating, comment=comment)
+    db.session.add(new_review)
+    db.session.commit()
+
+    return jsonify({"message": "Review added!"}), 201
+
