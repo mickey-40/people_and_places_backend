@@ -1,6 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
-
+from datetime import datetime
 db = SQLAlchemy()
 
 class User(db.Model):
@@ -32,8 +32,9 @@ class Review(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     restaurant_id = db.Column(db.Integer, db.ForeignKey("restaurants.id"), nullable=False)
-    rating = db.Column(db.Integer, nullable=False)  # Rating from 1 to 5
+    rating = db.Column(db.Integer, nullable=False)
     comment = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)  # ✅ Add timestamp
 
     user = db.relationship("User", backref="reviews")
     restaurant = db.relationship("Restaurant", backref="reviews")
