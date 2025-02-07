@@ -39,3 +39,8 @@ class Review(db.Model):
     user = db.relationship("User", backref="reviews")
     restaurant = db.relationship("Restaurant", backref="reviews")
 
+class TokenBlocklist(db.Model):
+    __tablename__ = "token_blocklist"
+    id = db.Column(db.Integer, primary_key=True)
+    jti = db.Column(db.String(36), nullable=False, unique=True)  # ✅ Store JWT identifier
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)  # ✅ Fix: Use function reference

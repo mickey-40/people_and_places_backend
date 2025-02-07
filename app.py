@@ -1,12 +1,13 @@
 from flask import Flask
+from flask_migrate import Migrate  # ✅ Import Flask-Migrate
 from flask import jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token
-from models import db
-from settings import Config
-from routes.auth import auth_bp
-from routes.restaurants import restaurants_bp
-from routes.users import users_bp
+from people_and_places_backend.models import User, db, TokenBlocklist
+from people_and_places_backend.settings import Config  # ✅ Corrected import
+from people_and_places_backend.routes.auth import auth_bp
+from people_and_places_backend.routes.restaurants import restaurants_bp
+from people_and_places_backend.routes.users import users_bp
 
 
 app = Flask(__name__)
@@ -21,8 +22,10 @@ CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}},
      methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
 app.config["JWT_ALGORITHM"] = "HS256"  # Ensure this matches login JWT
 jwt = JWTManager(app)
-db.init_app(app)
 
+# Initialize extensions
+db.init_app(app)
+migrate = Migrate(app, db)  # ✅ Register Flask-Migrate
 
 print("CORS is enabled:", app.config["CORS_HEADERS"])
 @app.route("/restaurants", methods=["OPTIONS"])
@@ -47,6 +50,12 @@ def initialize_database():
 def generate_token():
     token = create_access_token(identity="testuser")
     return jsonify(access_token=token)
+
+@jwt.token_in_blocklist_loader
+def check_if_token_revoked(jwt_header, jwt_payload):
+    jti = jwt_payload["jti"]
+    return db.session.query(TokenBlocklist.id).filter_by(jti=jti).scalar() is not None
+
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
-from models import User, db
-from flask_jwt_extended import create_access_token
+from people_and_places_backend.models import User, db, TokenBlocklist  # ✅ Corrected import
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt,create_access_token
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -32,4 +32,17 @@ def login():
 
     access_token = create_access_token(identity=str(user.id))  # ✅ Store user ID, not username
     return jsonify({"token": access_token}), 200
+
+@auth_bp.route("/logout", methods=["POST"])
+@jwt_required()
+def logout():
+    try:
+        jti = get_jwt()["jti"]  # ✅ Get the JWT unique identifier
+        token = TokenBlocklist(jti=jti)  # ✅ Create a new TokenBlocklist entry
+        db.session.add(token)
+        db.session.commit()
+        return jsonify({"message": "Successfully logged out"}), 200
+    except Exception as e:
+        db.session.rollback()  # ✅ Rollback in case of error
+        return jsonify({"error": str(e)}), 500  # ✅ Send error message in response
 

@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from models import Restaurant, Like, Review, User, db
+from people_and_places_backend.models import Restaurant, Like, Review, User, db
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 restaurants_bp = Blueprint("restaurants", __name__)
