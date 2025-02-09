@@ -95,6 +95,11 @@ def add_review():
     rating = data.get("rating")
     comment = data.get("comment")
 
+    # Check if the user already reviewed this restaurant
+    existing_review = Review.query.filter_by(user_id=user_id, restaurant_id=restaurant_id).first()
+    if existing_review:
+        return jsonify({"message": "You have already reviewed this restaurant. Edit your review instead."}), 400
+
     # Validate input
     if not (1 <= rating <= 5):
         return jsonify({"message": "Rating must be between 1 and 5"}), 400
@@ -104,6 +109,7 @@ def add_review():
     db.session.commit()
 
     return jsonify({"message": "Review added!"}), 201
+
 
 # allow users to view all reviews for a specific restaurant
 @restaurants_bp.route("/<int:restaurant_id>/reviews", methods=["GET"])
