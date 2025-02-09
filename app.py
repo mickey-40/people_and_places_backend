@@ -3,11 +3,11 @@ from flask_migrate import Migrate  # ✅ Import Flask-Migrate
 from flask import jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token
-from people_and_places_backend.models import User, db, TokenBlocklist
-from people_and_places_backend.settings import Config  # ✅ Corrected import
-from people_and_places_backend.routes.auth import auth_bp
-from people_and_places_backend.routes.restaurants import restaurants_bp
-from people_and_places_backend.routes.users import users_bp
+from models import User, db, TokenBlocklist
+from settings import Config  # ✅ Corrected import
+from routes.auth import auth_bp
+from routes.restaurants import restaurants_bp
+from routes.users import users_bp
 
 
 app = Flask(__name__)

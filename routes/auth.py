@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from people_and_places_backend.models import User, db, TokenBlocklist  # ✅ Corrected import
+from models import User, db, TokenBlocklist  # ✅ Corrected import
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt,create_access_token
 
 auth_bp = Blueprint("auth", __name__)
