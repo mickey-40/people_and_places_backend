@@ -176,3 +176,16 @@ def delete_review():
 
     return jsonify({"message": "Review deleted successfully"}), 200
 
+# fetch a Single Restaurant
+@restaurants_bp.route("/<int:restaurant_id>", methods=["GET"])
+def get_restaurant(restaurant_id):
+    restaurant = Restaurant.query.get(restaurant_id)
+
+    if not restaurant:
+        return jsonify({"message": "Restaurant not found"}), 404
+
+    return jsonify({
+        "id": restaurant.id,
+        "name": restaurant.name,
+        "description": restaurant.description
+    })
