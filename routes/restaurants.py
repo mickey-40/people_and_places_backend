@@ -1,8 +1,29 @@
 from flask import Blueprint, request, jsonify
-from people_and_places_backend.models import Restaurant, Like, Review, User, db
+from models import Restaurant, Like, Review, User, db
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 restaurants_bp = Blueprint("restaurants", __name__)
+
+# Allows admin to add a restaurant
+@restaurants_bp.route("/add", methods=["POST"])
+@jwt_required()  # Protect endpoint (optional)
+def add_restaurant():
+    user_id = get_jwt_identity()  # Get the authenticated user (optional)
+    data = request.get_json()
+
+    name = data.get("name")
+    description = data.get("description")
+
+    if not name or not description:
+        return jsonify({"message": "Name and description are required"}), 400
+
+    new_restaurant = Restaurant(name=name, description=description)
+    db.session.add(new_restaurant)
+    db.session.commit()
+
+    return jsonify({"message": "Restaurant added successfully", "restaurant_id": new_restaurant.id}), 201
+
+
 # Gets all restaurants
 @restaurants_bp.route("/", methods=["GET"])
 def get_restaurants():
@@ -74,6 +95,11 @@ def add_review():
     rating = data.get("rating")
     comment = data.get("comment")
 
+    # Check if the user already reviewed this restaurant
+    existing_review = Review.query.filter_by(user_id=user_id, restaurant_id=restaurant_id).first()
+    if existing_review:
+        return jsonify({"message": "You have already reviewed this restaurant. Edit your review instead."}), 400
+
     # Validate input
     if not (1 <= rating <= 5):
         return jsonify({"message": "Rating must be between 1 and 5"}), 400
@@ -83,6 +109,7 @@ def add_review():
     db.session.commit()
 
     return jsonify({"message": "Review added!"}), 201
+
 
 # allow users to view all reviews for a specific restaurant
 @restaurants_bp.route("/<int:restaurant_id>/reviews", methods=["GET"])
@@ -149,3 +176,16 @@ def delete_review():
 
     return jsonify({"message": "Review deleted successfully"}), 200
 
+# fetch a Single Restaurant
+@restaurants_bp.route("/<int:restaurant_id>", methods=["GET"])
+def get_restaurant(restaurant_id):
+    restaurant = Restaurant.query.get(restaurant_id)
+
+    if not restaurant:
+        return jsonify({"message": "Restaurant not found"}), 404
+
+    return jsonify({
+        "id": restaurant.id,
+        "name": restaurant.name,
+        "description": restaurant.description
+    })
