@@ -20,6 +20,9 @@ class Restaurant(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)  # ✅ Tracks the creator
+
+    user = db.relationship("User", backref="restaurants")  # ✅ Links restaurants to users
 
 class Like(db.Model):
     __tablename__ = "likes"
