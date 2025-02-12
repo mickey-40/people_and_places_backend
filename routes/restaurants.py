@@ -189,3 +189,62 @@ def get_restaurant(restaurant_id):
         "name": restaurant.name,
         "description": restaurant.description
     })
+
+# User can edit restaurant
+@restaurants_bp.route("/edit/<int:restaurant_id>", methods=["PUT"])
+@jwt_required()
+def edit_restaurant(restaurant_id):
+    user_id = get_jwt_identity()  # Get the authenticated user ID
+    data = request.get_json()
+
+    name = data.get("name")
+    description = data.get("description")
+
+    if not name or not description:
+        return jsonify({"message": "Name and description are required"}), 400
+
+    restaurant = Restaurant.query.get(restaurant_id)
+    if not restaurant:
+        return jsonify({"message": "Restaurant not found"}), 404
+
+    # Ensure only the creator can edit
+    if restaurant.user_id != user_id:
+        return jsonify({"message": "Unauthorized to edit this restaurant"}), 403
+
+    # Update restaurant
+    restaurant.name = name
+    restaurant.description = description
+    db.session.commit()
+
+    return jsonify({"message": "Restaurant updated successfully"}), 200
+
+# User can delete created restaurant
+@restaurants_bp.route("/delete/<int:restaurant_id>", methods=["DELETE"])
+@jwt_required()
+def delete_restaurant(restaurant_id):
+    user_id = get_jwt_identity()
+
+    restaurant = Restaurant.query.get(restaurant_id)
+    if not restaurant:
+        return jsonify({"message": "Restaurant not found"}), 404
+
+    # Ensure only the creator can delete
+    if restaurant.user_id != user_id:
+        return jsonify({"message": "Unauthorized to delete this restaurant"}), 403
+
+    db.session.delete(restaurant)
+    db.session.commit()
+
+    return jsonify({"message": "Restaurant deleted successfully"}), 200
+
+# Get user's restaurants
+@restaurants_bp.route("/my-restaurants", methods=["GET"])
+@jwt_required()
+def get_user_restaurants():
+    user_id = get_jwt_identity()  # Get authenticated user ID
+    user_restaurants = Restaurant.query.filter_by(user_id=user_id).all()
+
+    return jsonify([
+        {"id": r.id, "name": r.name, "description": r.description}
+        for r in user_restaurants
+    ])
