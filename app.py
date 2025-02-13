@@ -16,10 +16,7 @@ app.config["CORS_HEADERS"] = "Content-Type"
 
 # Initialize extensions
 # ✅ Allow specific origins, methods, and headers
-CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}}, 
-     supports_credentials=True,
-     allow_headers=["Content-Type", "Authorization"],
-     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}}, supports_credentials=True)
 app.config["JWT_ALGORITHM"] = "HS256"  # Ensure this matches login JWT
 jwt = JWTManager(app)
 
