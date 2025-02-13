@@ -17,9 +17,17 @@ def add_restaurant():
     if not name or not description:
         return jsonify({"message": "Name and description are required"}), 400
 
-    new_restaurant = Restaurant(name=name, description=description)
+    new_restaurant = Restaurant(
+        name=data["name"], 
+        description=data["description"],
+        user_id=user_id
+    )
     db.session.add(new_restaurant)
     db.session.commit()
+
+    print(f"Logged-in user ID: {user_id}")
+    print(f"Restaurant owner ID: {restaurant.user_id}")
+
 
     return jsonify({"message": "Restaurant added successfully", "restaurant_id": new_restaurant.id}), 201
 
@@ -196,6 +204,8 @@ def get_restaurant(restaurant_id):
 def edit_restaurant(restaurant_id):
     user_id = get_jwt_identity()  # Get the authenticated user ID
     data = request.get_json()
+    # print(f"Logged-in user ID: {user_id}")
+    # print(f"Restaurant owner ID: {restaurant.user_id}")
 
     name = data.get("name")
     description = data.get("description")
@@ -206,14 +216,20 @@ def edit_restaurant(restaurant_id):
     restaurant = Restaurant.query.get(restaurant_id)
     if not restaurant:
         return jsonify({"message": "Restaurant not found"}), 404
+    
+    user_id=int(user_id)
+    print(f"Logged-in user ID: {user_id} (Type: {type(user_id)})")
+    print(f"Restaurant owner ID: {restaurant.user_id} (Type: {type(restaurant.user_id)})")
+
 
     # Ensure only the creator can edit
     if restaurant.user_id != user_id:
         return jsonify({"message": "Unauthorized to edit this restaurant"}), 403
 
     # Update restaurant
-    restaurant.name = name
-    restaurant.description = description
+    restaurant.name = data.get("name", restaurant.name)
+    restaurant.description = data.get("description", restaurant.description)
+
     db.session.commit()
 
     return jsonify({"message": "Restaurant updated successfully"}), 200
